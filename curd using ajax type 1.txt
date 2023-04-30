@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="_token" content="{{csrf_token()}}" />
+    
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta1/css/bootstrap.min.css"
+    />
+
+    
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+    />
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"
+               integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+               crossorigin="anonymous">
+      </script>
+    <title>Hello, world!</title>
+  </head>
+  <body >
+
+    <section style="padding-top: 60px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        Students <a href="" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#studentModal">Add Student</a>
+                    </div>
+                    <div class="card-body">
+                    <table id="studentTable" class="table">
+                        <thead>
+                            <tr>
+                                <th>name</th>
+                                <th>email</th>
+                                <th>mobile</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($student as $x)
+                            <tr id="student_id{{$x->student_id}}">
+                                <td>{{$x->name}}</td>
+                                <td>{{$x->email}}</td>
+                                <td>{{$x->mobile}}</td>
+                                <td id="action">
+                                    <a href="javascript:void(0)"  onclick="editstudent({{$x->student_id}})" class="btn btn-primary">edit</a>
+                                    <a href="javascript:void(0)" onclick="deletestudent({{$x->student_id}})" class="btn btn-danger">delete</a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+
+</section>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Student</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+            <form  id="studentForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="email">email</label>
+                    <input type="email" id="email" class="form-control">
+                    
+                </div>
+                <div class="form-group">
+                    <label for="mobile">mobile</label>
+                    <input type="text" id="mobile" class="form-control">
+                </div>
+                <br>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    
+
+
+<!--edit Modal -->
+<div class="modal fade" id="editModel" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Student</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+            <form  id="editForm">
+                <input type="hidden" id="student_id" name="student_id">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name1" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="email">email</label>
+                    <input type="email" id="email1" class="form-control">
+                    
+                </div>
+                <div class="form-group">
+                    <label for="mobile">mobile</label>
+                    <input type="text" id="mobile1" class="form-control">
+                </div>
+                <br>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-beta1/js/bootstrap.bundle.min.js"></script>
+<script>
+
+$("#studentForm").submit(function(e){
+    e.preventDefault();
+
+    let name = $('#name').val();
+    let email = $('#email').val();
+    let mobile = $('#mobile').val();
+
+    $.ajaxSetup({
+                  headers: {
+                      'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                  }
+              });
+
+
+              $.ajax({
+                  url : "{{route('student.add')}}",
+                  type : "POST",
+                  data :
+                  {
+                      name : name,
+                      email : email,
+                      mobile : mobile
+                  },
+                  success : function(response)
+                  {
+                      if(response)
+                      {
+                          $('#studentTable tbody').prepend('<tr><td>'+response.name+'</td><td>'+response.email+'</td><td>'+response.mobile+'</td></tr>');
+                          $('#studentForm')[0].reset();
+                          $('#studentModal').modal('hide');
+
+                         
+                      }
+                  }
+              })
+})
+
+
+</script>
+
+<script>
+    function editstudent(id)
+    {
+        $.get('/studentedit/'+id, function(student){
+            $('#student_id').val(student.student_id);
+            $('#name1').val(student.name);
+            $('#email1').val(student.email);
+            $('#mobile1').val(student.mobile);
+            $('#editModel').modal('toggle');
+        })
+    }
+
+
+    $('#editForm').submit(function(e){
+        e.preventDefault();
+        let student_id = $('#student_id').val();
+        let name = $('#name1').val();
+        let email = $('#email1').val();
+        let mobile = $('#mobile1').val();
+        $.ajaxSetup({
+                  headers: {
+                      'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                  }
+              });
+
+        $.ajax({
+                  url : "{{route('update')}}",
+                  type : "POST",
+                  data :
+                  {
+                      student_id : student_id,
+                      name : name,
+                      email : email,
+                      mobile : mobile
+                  },
+                  success : function(response)
+                  {
+                      $('#student_id'+response.student_id +' td:nth-child(1)').text(response.name);
+                      $('#student_id'+response.student_id +' td:nth-child(2)').text(response.email);
+                      $('#student_id'+response.student_id +' td:nth-child(3)').text(response.mobile);
+                      $('#editModel').modal('toggle');
+                      $('#editForm')[0].reset();
+                  }
+    });
+
+});
+</script>
+
+<script>
+        function deletestudent(id)
+    {
+        if(confirm("Do you really want to delete"))
+        {
+            $.ajaxSetup({
+                  headers: {
+                      'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                  }
+              });
+
+            
+            $.ajax({
+                url : "/deletestudent/"+id,
+                type : "DELETE",
+                
+                success : function(response)
+                {
+                    if(response.msg == "success")
+                    {
+                        alert('deleted successfully');
+                        $('#student_id'+student_id).remove();
+                        
+                    }
+                   
+                   
+                }
+            })
+        }
+    }
+
+</script>
+
+    
+  </body>
+</html>
+
+
+-----------------------------------------------------controllers---------------------------------
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Student;
+
+class StudentController extends Controller
+{
+    public function index()
+    {
+        $student = Student::all();
+        $data = compact('student');
+        return view('student')->with($data);
+
+    }
+
+    public function student(Request $request)
+    {
+        $student = new Student;
+        $student->name = $request['name'];
+        $student->email = $request['email'];
+        $student->mobile = $request['mobile'];
+        $student->save();
+
+        return response()->json($student);
+    }
+
+    public function editstudent($id)
+    {
+        $student = Student::find($id);
+        return response()->json($student);
+    }
+
+    public function updatestudent(Request $request)
+    {
+        $student = Student::find($request['student_id']);
+        $student->name = $request['name'];
+        $student->email = $request['email'];
+        $student->mobile = $request['mobile'];
+        $student->save();
+
+        return response()->json($student);
+    }
+
+    public function deletestudent($id)
+    {
+        $student = Student::find($id)->delete();
+
+        return response()->json(['msg'=>'success']);
+    }
+}
+
+---------------------------------------------------routes---------------------------------
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StudentController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+
+Route::get('student',[StudentController::class,'index']);
+
+Route::post('add-student',[StudentController::class,'student'])->name('student.add');
+
+Route::get('studentedit/{id}',[StudentController::class,'editstudent']);
+
+Route::post('updatestudent',[StudentController::class,'updatestudent'])->name('update');
+
+Route::delete('deletestudent/{id}',[StudentController::class,'deletestudent'])->name('delete');

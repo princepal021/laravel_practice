@@ -1,0 +1,122 @@
+Register api
+No token required
+
+Step One
+http://localhost/MaharajaPrestonApi/api/v1/user/registerStepOne
+
+input
+{
+    "name":"Rajat",
+    "email":"rajat@test.com",
+    "phone":9090909090,
+    "password":"123456"
+}
+
+output
+{
+    "status": "success",
+    "message": "OTP Sent.417373",
+    "response": []
+}
+
+
+step two
+http://localhost/MaharajaPrestonApi/api/v1/user/registerStepTwo
+
+input
+{
+    "name":"Rajat",
+    "email":"rajat@test.com",
+    "phone":9090909090,
+    "password":"123456",
+    "dob" : "1991-09-08",
+    "gender" : "M"
+}
+
+output
+
+{
+    "status": "success",
+    "message": "",
+    "response": []
+}
+
+Step three
+http://localhost/MaharajaPrestonApi/api/v1/user/register
+
+input
+[{"key":"otp code","value":"417373","description":"","type":"default","enabled":true},{"key":"name","value":"Rajat","description":"","type":"default","enabled":true},
+{"key":"email","value":"rajat@test.com","description":"","type":"default","enabled":true},{"key":"phone","value":"9090909090","description":"","type":"default","enabled":true},
+{"key":"password","value":"123456","description":"","type":"default","enabled":true},{"key":"dob","value":"1991-09-08","description":"","type":"default","enabled":true},
+{"key":"gender","value":"M","description":"","type":"default","enabled":true}]
+
+ouput
+{
+    "status": "success",
+    "message": "Registration completed successfully.",
+    "response": []
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+Forgot Password 
+
+http://localhost/MaharajaPrestonApi/api/v1/forgotPassword
+
+input
+{
+    "phone" : 9090909090
+}
+
+output
+{
+    "status": "success",
+    "message": "OTP Sent.42173",
+    "response": []
+}
+
+Reset Password
+http://localhost/MaharajaPrestonApi/api/v1/resetPassword
+
+{
+    "phone" : 9090909090,
+    "otp_code": 42173,
+    "password": "rajat@123",
+    "password_confirmation": "rajat@123"
+}
+
+output
+
+{
+    "status": "success",
+    "message": "Password Changed. Please login to continue.",
+    "response": []
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Get user Detail
+http://localhost/MaharajaPrestonApi/api/v1/store/getUserDetails
+Token and login required using storeadmin credientials
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Store Menu list With Category
+http://localhost/MaharajaPrestonApi/api/v1/store/storeItemCat
+Token and login require		d using storeadmin credientials
+
+------------------------------------------------------------------------------------------
+Update Menu item Status
+http://localhost/MaharajaPrestonApi/api/v1/store/updateMenuItem
+
+input
+{
+    "menu_item_id":1,
+    "item_status" : "Inactive"
+   
+}
+
+outtput
+{
+    "status": "success",
+    "message": "Menu items update successfully"
+}

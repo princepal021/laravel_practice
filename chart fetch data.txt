@@ -1,0 +1,26 @@
+//$data = \DB::table('bill_details') 
+    	//->where('distributor_id',$request->id)
+    	//->whereBetween('date',[Carbon::now()->startOfMonth()->format("Y-m-d H:i:s"), Carbon::now()->endOfMonth()])
+		//->orderBy('date','ASC')
+		//->select(DB::raw('SUM(total_quantity) AS Quantity'),'date')
+		//->groupBy('date')
+   		//->get();
+		
+		
+		// $data = BillDetail::where('distributor_id',$request->id)
+		//	->whereMonth('date', date('m'))
+		//	->whereYear('date', date('Y'))
+		//	->orderBy('date','ASC')
+			//->select(DB::raw('SUM(total_quantity) AS Quantity'),'date')
+			//->groupBy('date')
+		//->get();
+	
+		
+    	 //$date = []; 
+		//$quantity = [];
+		
+		//foreach($data as $rows)
+		//{
+			//$date[] = $rows->date;
+			//$quantity[] = $rows->Quantity;
+		//} 

@@ -1,0 +1,42 @@
+step 1 Run the following command:
+
+	composer require "darkaonline/l5-swagger"
+	
+	according to version of laravel
+	composer require "darkaonline/l5-swagger:6.*"
+
+Step 2 open your config/app.php and add this line in providers section
+
+	L5Swagger\L5SwaggerServiceProvider::class,
+
+Step 3 Add the following line in Controller.php file
+
+	    /**
+ * @OA\Info(
+ *      version="1.0.0",
+ *      title="Maharaja Preston OpenApi",
+ *      description="MaharajaPreston OpenApi description",
+ *      @OA\Contact(
+ *          email="admin@maharajapreston.com"
+ *      ),
+ *     @OA\License(
+ *         name="Apache 2.0",
+ *         url="https://www.apache.org/licenses/LICENSE-2.0.html"
+ *     )
+ * )
+ */
+
+Step 4 open the controller file in which you write you code.
+
+step 5 Run the command
+ php artisan vendor:publish --provider "L5Swagger\L5SwaggerServiceProvider"
+
+Step 6 run the command
+php artisan l5-swagger:generate
+
+Step 6A add the following line in .env file
+L5_SWAGGER_GENERATE_ALWAYS="true"
+
+step 7 run the application
+
+step 8 localost/api/documentaion.

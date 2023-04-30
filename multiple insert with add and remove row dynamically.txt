@@ -1,0 +1,341 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\City;
+use App\Models\State;
+use App\Models\Distributor;
+use App\Models\DistributorBilling;
+use App\Models\Product;
+use App\Models\ProductVariant;
+use App\Models\BillDetail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+
+class  DistributorBillingController extends Controller
+{
+	public function list(Request $request)
+	{
+		$state = State::all();
+		$list = Distributor::join('tbl_states','distributors.state_id','tbl_states.id')
+			->where('state_id',$request->state_id)
+			->select('distributors.*','tbl_states.name as state')
+			->get();
+		return view('admin.statwise-distributor-billing.list', compact('list','state'));
+	}
+	public function detail(Request $request)
+    {
+        $distributor = Distributor::where('id', $request->id)
+            ->first();
+		$products = Product::all();
+        return view('admin.statwise-distributor-billing.add', compact('distributor','products'));
+    }
+	public function save(Request $request)
+	{
+		 $validator = Validator::make($request->all(), [
+            'product' => 'required',
+            'weight' => 'required',
+            'price' => 'required',
+            'quantity' => 'required',
+			 'total_quantity'=>'required',
+			 'total_price'=>'required'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->with(['error' => $validator->errors()]);
+        }
+		
+		date_default_timezone_set("Asia/Kolkata");
+        	$date = date('Y-m-d H:i:s');
+		 $randomNumber = random_int(1000000000, 9999999999);
+		$bill = new BillDetail();
+		$bill->invoice_no = $randomNumber;
+		$bill->distributor_id=$request['distributor_id'];
+        $bill->total_quantity =$request['total_quantity'];
+        $bill->total_price = $request['total_price'];
+		$bill->date = $date;
+        $bill->save();
+        $id= $bill->id;
+		
+		
+		 foreach ($request->product as $key=>$product)
+        {
+            $data = new DistributorBilling();
+            $data->bill_id=$id;
+            $data->product_id = $request->product[$key];
+            $data->weight = $request->weight[$key];
+            $data->price = $request->price[$key];
+            $data->quantity = $request->quantity[$key];
+			
+            $data->save();
+        }
+		
+            return redirect('/bill-list')->with(['success' => 'Bill Added Successfully']);
+        
+    }
+	
+	public function getweight($id)
+	{
+		$weight = ProductVariant::where('product_id',$id)->pluck("weight","id");
+        return json_encode($weight);
+	
+	}
+	
+	public function getprice($id)
+	{
+		$price = ProductVariant::all()->where('id',$id)->pluck("price");
+		return json_encode($price);
+	}
+	
+	public function bill_list()
+	{
+		$billlist = BillDetail::join('distributors','distributors.id','bill_details.distributor_id')
+			->select('distributors.*','bill_details.*')
+			->get();
+		return view('admin.statwise-distributor-billing.bill-list', compact('billlist'));
+	}
+	
+	public function bill_detail(Request $request)
+	{
+		 $billdetail = DistributorBilling::join('bill_details','bill_details.id','distributor_billing_details.bill_id')
+			->join('products','products.id','distributor_billing_details.product_id')
+			->join('distributors','distributors.id','bill_details.distributor_id')
+			->join('tbl_states','distributors.state_id','tbl_states.id')
+			->join('tbl_cities','distributors.city_id','tbl_cities.id')
+			->join('product_variants','product_variants.id','distributor_billing_details.weight')
+			->select('bill_details.*','distributor_billing_details.*','distributors.name as distributor_name','distributors.email','distributors.phone','tbl_states.name as state','products.name as product_name', 'tbl_cities.name as city','product_variants.weight as weights')
+			->where('bill_details.id',$request->id)
+			->get();
+		return view('admin.statwise-distributor-billing.bill-detail',compact('billdetail'));
+	}
+	
+		
+	
+	
+	
+}
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>view>>>>>>>>>>>>>>>>>>>>>>>>>>
+@extends('admin.layout.app')
+@section('title','Distributor Billing Add')
+@section('content')
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-1">
+            <div class="col-sm-6">
+                <a href="{{url('/distributor-billing')}}" role="button" class="btn btn-sm btn-primary"><i class="fas fa-arrow-alt-circle-left"></i> Back</a>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{{url('/')}}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Distributor Billing Add</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-info-circle"></i> Distributor Billing Add</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12 col-12">
+                <form id="form">
+                   
+                    <div class="row">
+                        <div class="form-group col-lg-3">
+                            <label for="">SKU</label>
+                           <select name="product" id="product"class="form-control" required>
+                                <option value="">Choose product </option>
+                                @foreach ($products as $product)
+                                    <option value="{{ $product->id }}">
+                                        {{ $product->sku_no }} 
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+						 <div class="form-group col-lg-3">
+                            <label for="">Weight</label>
+ 										<select id="weight" name="weight" class="form-control" required>
+                                            
+                                    </select>
+                        </div>
+						 <div class="form-group col-lg-3">
+                            <label for="">Price</label>
+ 								<input type="number" class="form-control" name="price" id="price" value="" required>		
+                        </div>
+					
+                        <div class="form-group col-lg-3">
+                            <label for="">Quantity</label>
+                            <input type="number" class="form-control" name="quantity" id="quantity" placeholder="Enter quantity" required>
+                        </div>
+					</div>
+                    
+                      
+                        <div class="form-group col-lg-12 ">
+                            <button type="submit" class="btn btn-primary" id="add">Add</button>
+                        </div>
+                    
+                </form>
+            </div>
+        </div>
+		<div class="card">
+        	<div class="card-body">
+				<form action="{{url('/distributor-billing-save')}}" method="post">
+            	<table id="example1" class="table table-bordered ">
+					@csrf
+					<input type="hidden" class="form-control" name="distributor_id"  value="{{$distributor->id}}">
+                	<thead>
+                    	<tr>
+                        	<th style="width:10%">Product</th>
+                            <th style="width:10%">Weight</th>
+							<th style="width:15%">Price</th>
+                            <th style="width:15%">Quantity</th>
+							 <th style="width:10%">Total Price</th>
+							<th style="width:10%">Action</th>
+                        </tr>
+                   </thead>
+                   <tbody>
+							
+					</tbody>
+					 <tfoot>
+            <tr>
+                <th class="text-right" colspan="3">Total</th>
+                <th><input type="number" class="border-0 tquantity" id="totalquantity" name="total_quantity"></th>
+				 <th ><input type="number" class="border-0 stotal" id="totalprice" name="total_price"></th>
+                <th></th>
+            </tr>
+
+        </tfoot>
+					
+               </table>
+					 
+					<button class="btn btn-success">Submit</button>
+			</form>
+           </div>
+                    <!-- /.card-body -->
+     	</div>
+    </div>
+</section>
+<script>
+	$(document).ready(function(){
+	      $('#product').change(function(){
+            let product_id = $(this).val();
+            $.ajaxSetup({
+                  headers: {
+                      'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                  }
+              });
+
+              if(product_id)
+              {
+                  $.ajax({
+                      url : "/getweight/"+ product_id,
+                      type : "GET",
+                        dataType : "json",
+                      success : function(data)
+                      {
+                          $('#weight').empty();
+						  $('#weight').append('<option hidden>Choose Weight</option>'); 
+                            $.each(data, function(key,value){
+                                $('#weight').append('<option value="' + key + '">' +value+ '</option>');
+                            })
+
+                      }
+                  })
+
+                }
+        })
+	});
+</script>
+<script>
+	$(document).ready(function(){
+	      $('#weight').change(function(){
+            let id = $(this).val();
+            $.ajaxSetup({
+                  headers: {
+                      'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                  }
+              });
+
+              if(id)
+              {
+                   $.ajax({
+                      url : "/getprice/"+ id,
+                      type : "GET",
+                        dataType : "json",
+                      success : function(data)
+                      {
+                        $("#price").val(data);
+
+                      }
+                  })
+
+                }
+        })
+	});
+</script>
+
+<script>
+	$('#add').on('click',function(){
+	 	var product = $('#product').val();
+        var weight = $('#weight').val();
+        var price = $('#price').val();
+        var quantity = $('#quantity').val();
+		var i = 1;
+	  if(product != "" && weight != "" && price !="" && quantity != "")
+        {
+		$('#example1 tbody').append('<tr><td><input type="number" class="border-0" name="product[]" value="'+product+'" readonly></td><td><input type="number" class="border-0" name="weight[]" value="'+weight+'"></td><td><input type="number" class="border-0 price" name="price[]" value="'+price+'"></td><td><input type="number" name="quantity[]"  class="border-0 quantity" value="'+quantity+'"></td><td><input type="number" class="border-0 total" name="total[]"></td><td><a href="javascript:void(0);" class="remCF1 btn btn-small btn-danger">Remove</a></td></tr>');
+          $('#form')[0].reset();
+
+          calculate();
+		}
+		else
+		{
+			
+		}
+		
+      });
+	 
+	 function calculate()
+      {
+        var subtotal = 0;
+        var totalquantity = 0;
+
+        $("#example1 tbody tr").each(function() {
+          var quantity = Number($(this).find('.quantity').val());
+          var price = Number($(this).find('.price').val());
+          var total = quantity * price;
+          $(this).find('.total').val(total);
+          subtotal += total;
+          $(this).find('.quantity').val(quantity);
+          totalquantity += quantity;
+  });
+  $('.stotal').val(subtotal);
+  $('.tquantity').val(totalquantity);
+}
+	
+	$('#example1').on('input', 'input', calculate)
+          .on('click', '.remCF1', function() {
+    
+    $(this).closest("tr").remove();
+    calculate();
+  });
+
+	
+	
+	
+
+</script>
+@endsection

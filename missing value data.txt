@@ -1,0 +1,23 @@
+	
+		//$period = CarbonPeriod::create($from, $to);
+		//$dates = collect($period->toArray())->mapWithKeys(function ($date) {
+  		//return [$date->format('Y-m-d') => []];
+		//});
+		
+		
+		
+		//$data = \DB::table('bill_details') 
+    	//->where('distributor_id',$request->id)
+    	//->whereBetween('date',[$from, $to])
+		//->orderBy('date','ASC')
+		//->groupBy('date')	
+		//->select(DB::raw('SUM(total_quantity) AS Quantity'),'date')
+   		//->get();
+		
+		
+		
+		//$uptimeDates = $data->groupBy(function ($item, $key) {
+  		//return Carbon::parse($item->date)->format('Y-m-d');
+		//});
+		
+		//$uptimeData = $dates->merge($uptimeDates)->toArray();

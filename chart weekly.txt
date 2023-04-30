@@ -1,0 +1,35 @@
+$weeklydata = \DB::table('bill_details')
+		->where('distributor_id',$request->id)
+		->whereBetween('date',[Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
+		->orderBy('date','ASC')
+		->select(DB::raw('SUM(total_quantity) AS Quantity'),'date')
+		->groupBy('date')
+   		->get();
+		
+		$Date = [];
+		$Quantity = [];
+		foreach($weeklydata as $i)
+		{
+			$Date[] = $i->date;
+			$Quantity[] = $i->Quantity;
+		}
+		
+		
+		
+		
+		
+		return view('admin.distributor.saleschart',['data'=>$data,  'weeklydata'=>$weeklydata, 'Date'=>$Date, 				'Quantity'=>$Quantity]);
+
+
+
+
+
+
+
+
+
+
+
+$weeklydata
+$labels
+$quantitys

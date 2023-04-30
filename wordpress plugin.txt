@@ -1,0 +1,200 @@
+<?php
+    /**
+     * Plugin Name: My Plugin
+     * Description: Plugin Description
+     * Version: 1.0.0
+     * Author: myplugin
+     */ 
+
+ 
+ function create_table()
+ {
+    global $wpdb, $table_prefix;
+    $user = $table_prefix.'student';
+    
+    $query = "CREATE TABLE `$user` ( `id` INT NOT NULL AUTO_INCREMENT , `author_id` INT NOT NULL,`realname` VARCHAR(255) NOT NULL ,  PRIMARY KEY (`id`)) ENGINE = InnoDB; ";
+
+    $wpdb->query($query);
+
+ }
+
+ register_activation_hook(__FILE__,'create_table');
+
+
+
+function drop_table()
+{
+    global $wpdb, $table_prefix;
+    $user = $table_prefix.'student';
+
+    $query = "DROP TABLE `$user`;";
+    $wpdb->query($query);
+    
+
+}
+
+ register_deactivation_hook(__File__,'drop_table');
+
+
+ add_action('admin_menu','setup_menu');
+ add_action('wp_ajax_upsert_caa','upsert_caa');
+
+ function setup_menu(){
+    add_menu_page('Author Real Name Assign', 'Real Name', 'manage_options', 'category-author-auto-assign', 'caaa_admin_page');
+}
+
+function caaa_admin_page()
+{
+    $authors = get_users();
+    ?>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <br/>
+                <h2>Author RealName</h2>
+                <hr>
+                <div class="alert alert-primary gj-alert" role="alert">
+                     Welcome,
+                </div>
+                <form id="the_form" action="">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>Author Name</h4>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>Author Real Name</h4>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <select class="form-select caaa" name="author_id[]" id="author_name1">
+                                    <option value="">None</option>
+                                    <?php foreach($authors as $author): ?>
+                                        <option value="<?=$author->ID?>"><?=$author->display_name?></option>
+                                        <br><br>
+                                    <?php endforeach; ?>  
+                                </select>  
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <select class="form-select caaa" name="author_id[]" id="author_name2">
+                                    <option value="">None</option>
+                                    <?php foreach($authors as $author): ?>
+                                        <option value="<?=$author->ID?>"><?=$author->display_name?></option>
+                                        <br><br>
+                                    <?php endforeach; ?>  
+                                </select>  
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <select class="form-select caaa" name="author_id[]" id="author_name3">
+                                    <option value="">None</option>
+                                    <?php foreach($authors as $author): ?>
+                                        <option value="<?=$author->ID?>"><?=$author->display_name?></option>
+                                        <br><br>
+                                    <?php endforeach; ?>  
+                                </select>  
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input class="realname" type="text" name="realname[]" id="name">
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <input class="realname" type="text" name="realname[]" id="name1">
+                            </div>
+                            <br>
+                            <div class="form-group">
+                                <input class="realname" type="text" name="realname[]" id="name2">
+                            </div>
+                        </div>
+                    </div>
+                       
+                   
+                    <br>
+                    <input type="button" value="submit" class="btn btn-primary" id="submit">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        jQuery(document).ready(function(){
+
+            jQuery("select").change(function() {   
+            jQuery("select").not(this).find("option[value="+ jQuery(this).val() + "]").attr('disabled', true);
+            }); 
+            
+
+            jQuery("#submit").click(function(){
+                var form_data = $("#the_form").serialize();
+                alert(form_data);
+                jQuery.ajax({
+                    type:'POST', 
+                    // dataType: 'json',
+                    url: "<?php echo admin_url('admin-ajax.php'); ?>",
+                    data:{action:'upsert_caa', author_id:author_id,realname: realname},
+                    success: function(data) 
+                    {
+                        data = JSON.parse(data);
+                        jQuery(".gj-alert").removeClass("alert-success");
+                        jQuery(".gj-alert").removeClass("alert-danger");
+                        jQuery(".gj-alert").addClass(data.class);
+                        jQuery(".gj-alert").html(data.message);
+                        
+                    }
+                })
+                
+            })
+        })
+    </script>
+   
+<?php
+}
+
+function upsert_caa(){
+    global $wpdb, $table_prefix;
+    $user = $table_prefix.'student';
+
+    $author_id = $_POST["author_id"];
+    $realname = $_POST['realname'];
+   
+        $result = $wpdb->insert($user , 
+            array(
+                'author_id'=>$author_id,
+                'realname' => $realname, 
+            )
+        );
+
+    // foreach($_POST['author_id'] as $key => $item)
+    // {
+    //     $result = $wpdb->insert($user , 
+    //        array(
+    //              'author_id'=>:author_id,
+    //              'realname' => $realname, 
+    //          )
+    //      );
+
+    // }
+
+
+    if($result){
+        $data = array();
+        $data['class'] = "alert-success";
+        $data['message'] = "realname of author is ". " ".$realname;
+        echo wp_json_encode($data);
+    }else{
+        $data = array();
+        $data['class'] = "alert-danger";
+        $data['message'] = "Error - ";
+        echo wp_json_encode($data);
+    }
+    wp_die(); 
+}
+
+
+
+?>

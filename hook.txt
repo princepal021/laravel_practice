@@ -1,0 +1,3 @@
+action hook :allow to run code when an event happen in wordpress.
+
+fillter hook : allow to modify data before either sent to the database and display on browser

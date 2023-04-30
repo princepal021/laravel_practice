@@ -1,0 +1,155 @@
+<?php
+    /**
+     * Plugin Name: My Plugin
+     * Description: Plugin Description
+     * Version: 1.0.0
+     * Author: myplugin
+     */ 
+
+ 
+ function create_table()
+ {
+    global $wpdb, $table_prefix;
+    $user = $table_prefix.'student';
+    
+    $query = "CREATE TABLE `$user` ( `id` INT NOT NULL AUTO_INCREMENT , `author_id` INT NOT NULL, `realname` VARCHAR(255) NOT NULL ,  PRIMARY KEY (`id`)) ENGINE = InnoDB; ";
+
+    $wpdb->query($query);
+
+ }
+
+ register_activation_hook(__FILE__,'create_table');
+
+
+
+function drop_table()
+{
+    global $wpdb, $table_prefix;
+    $user = $table_prefix.'student';
+
+    $query = "DROP TABLE `$user`;";
+    $wpdb->query($query);
+    
+
+}
+
+ register_deactivation_hook(__File__,'drop_table');
+
+
+ add_action('admin_menu','setup_menu');
+ add_action('wp_ajax_upsert_caa','upsert_caa');
+
+ function setup_menu(){
+    add_menu_page('Author Real Name Assign', 'Real Name', 'manage_options', 'category-author-auto-assign', 'caaa_admin_page');
+}
+
+function caaa_admin_page()
+{
+    // $form_action = "#";
+    ?>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <br/>
+                <h2>Author RealName</h2>
+                <hr>
+                <div class="alert alert-primary gj-alert" role="alert">
+                     Welcome,
+                </div>
+                <form action="">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <h4>Author Id</h4>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" name="author_id[]" id="author_id">
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" name="realname[]" id="name" class="nameauthor">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" name="realname[]" id="name1" class="nameauthor">
+                            </div>
+                        </div>
+                    </div>
+                    <input type="button" value="submit" class="btn btn-primary" id="submit">
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        jQuery(document).ready(function(){
+            jQuery("#submit").click(function(){
+                var author_id = jQuery("#author_id").val();
+                var realname = jQuery(".nameauthor").serialize();
+                alert(author_id+","+realname);
+                jQuery.ajax({
+                    type:'POST', 
+                    // dataType: 'json',
+                    url: "<?php echo admin_url('admin-ajax.php'); ?>",
+                    data:{action:'upsert_caa',author_id:author_id, realname: realname},
+                    success: function(data) 
+                    {
+                        data = JSON.parse(data);
+                        jQuery(".gj-alert").removeClass("alert-success");
+                        jQuery(".gj-alert").removeClass("alert-danger");
+                        jQuery(".gj-alert").addClass(data.class);
+                        jQuery(".gj-alert").html(data.message);
+                        
+                    }
+                })
+                
+            })
+        })
+    </script>
+   
+<?php
+}
+
+function upsert_caa(){
+    global $wpdb, $table_prefix;
+    $user = $table_prefix.'student';
+    // $author_id = $_POST['author_id'];
+    
+
+    
+   
+   
+        $result = $wpdb->insert($user , 
+            array(
+                
+            ),
+    
+            
+        );
+
+
+    
+
+    
+    if($result){
+        $data = array();
+        $data['class'] = "alert-success";
+        $data['message'] = "real of author is ". " ";
+        echo wp_json_encode($data);
+    }else{
+        $data = array();
+        $data['class'] = "alert-danger";
+        $data['message'] = "Error - ";
+        echo wp_json_encode($data);
+    }
+    var_dump($result);
+    wp_die(); 
+}
+
+
+?>

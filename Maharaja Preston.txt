@@ -1,0 +1,21 @@
+From Admin Panel 
+	Theme Setting:
+		1. In Header Section
+			1. Change Logo
+			2. Header Description
+			3. Header Slider Intro
+		2. In Footer Section
+			1. Add Social Media link
+			2. Site About Us Title
+			3. Site About Us Description
+			4. Copy Right
+		3. Add and remove Payment Gateway
+		4. Add Custom CSS
+
+
+
+
+
+In Frontend
+	New Deals not applied.
+						

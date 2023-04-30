@@ -1,0 +1,18 @@
+Changes in project 
+
+1. MenuitemsCategory Contoller
+line no. 75 add      $menuItemCategory->cat_status = $request->input('cat_status');
+
+2. Views\Admin\Store\storedeliverylocationprince
+line no. 53,54,55,56,57
+<div class="input-group row">
+	<label class="col-form-label" for="charges">Charges</label><br>
+	<input type="text" name="charges" id="charges" class="form-control form-control-lg InputNumber" placeholder="Store charges" value="<?php echo $storePrice->charges ?>">
+	<span class="md-line"></span>
+</div>
+
+3. add column in store table 
+column name is store_you_may_like_item_show_count
+
+
+

@@ -1,0 +1,113 @@
+	
+	public function sales(Request $request)
+	{
+		$from = Carbon::now()->startOfMonth()->format('Y-m-d');
+		$to = Carbon::now()->endofMonth();
+		
+		$period = new DatePeriod( new DateTime($from), new DateInterval('P1D'), new DateTime($to));
+		
+		foreach($period as $date)
+		{
+          $range[$date->format("Y-m-d")] = 0;
+      	}
+		$data = \DB::table('bill_details') 
+    	->where('distributor_id',$request->id)
+    	->whereBetween('date',[$from, $to])
+		->orderBy('date','ASC')
+		->groupBy('date')	
+		->select(DB::raw('SUM(total_quantity) AS Quantity'),'date')
+   		->get();
+		
+		$dbData = [];
+		
+		foreach($data as $val)
+		{
+       		$dbData[$val->date] = $val->Quantity;
+		}
+		
+		$data = array_replace($range, $dbData);
+		
+		foreach($data as $x=>$value)
+		{
+			$label[] = $x;
+			$quantity[] =$value;
+		}
+		
+		//weekly chart data
+		
+		$start = Carbon::now()->startOfWeek();
+		$end = Carbon::now()->endOfWeek();
+		
+		$periods = new DatePeriod( new DateTime($start), new DateInterval('P1D'), new DateTime($end));
+		
+		foreach($periods as $date)
+		{
+          $ranges[$date->format("Y-m-d")] = 0;
+      	}
+		
+		$weeklydata = \DB::table('bill_details')
+		->where('distributor_id',$request->id)
+		->whereBetween('date',[Carbon::now()->startOfWeek(),Carbon::now()->endOfWeek()])
+		->orderBy('date','ASC')
+		->select(DB::raw('SUM(total_quantity) AS Quantity'),'date')
+		->groupBy('date')
+   		->get();
+		
+		$dbdata = [];
+		
+		foreach($weeklydata as $val)
+		{
+       		$dbdata[$val->date] = $val->Quantity;
+		}
+		
+		$weeklydata = array_replace($ranges, $dbdata);
+		
+		
+		
+		foreach($weeklydata as $x=>$value)
+		{
+			$labels[] = $x;
+			$quantitys[] =$value;
+		}
+		
+		
+		//monthwise wise yearly data
+		
+		
+		$yearlydata = BillDetail::select(DB::raw("(SUM(total_quantity)) as Quantity"),DB::raw("MONTHNAME(date) as monthname"))
+			->where('distributor_id',$request->id)
+			->whereYear('date', date('Y'))
+			->groupBy('monthname')
+			->get();
+
+            $firstdate = date( 'Y' ) . '-01-01';
+		    $lastdate = date('Y') . '-12-31';
+		
+		$interval = new DatePeriod( new DateTime($firstdate), new DateInterval('P1M'), new DateTime($lastdate));
+		
+		foreach($interval as $date)
+		{
+          $rangess[$date->format("F")] = 0;
+      	}
+		
+		$dbdatas = [];
+		
+		foreach($yearlydata as $val)
+		{
+       		$dbdatas[$val->monthname] = $val->Quantity;
+		}
+		
+		
+		$yearlydata = array_replace($rangess, $dbdatas);
+		
+		foreach($yearlydata as $x=>$value)
+		{
+			$Labels[] = $x;
+			$Quantitys[] =$value;
+		}
+		
+		
+		return view('admin.distributor.saleschart',['data'=>$data, 'label'=>$label, 'quantity'=>$quantity,'weeklydata'=>$weeklydata, 'labels'=>$labels,'quantitys'=>$quantitys,'yearlydata'=>$yearlydata,'Labels'=>$Labels,'Quantitys'=>$Quantitys]);
+		
+		
+	}

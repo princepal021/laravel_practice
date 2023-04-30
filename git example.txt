@@ -1,0 +1,56 @@
+Microsoft Windows [Version 10.0.19043.1387]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\HP\Desktop\first>git init
+Initialized empty Git repository in C:/Users/HP/Desktop/first/.git/
+
+C:\Users\HP\Desktop\first>git add .
+
+C:\Users\HP\Desktop\first>git commit -m "ok"
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'HP@DESKTOP-TNGQMGN.(none)')
+
+C:\Users\HP\Desktop\first>git config --global user.email price.grimbyte@gmail.com
+
+C:\Users\HP\Desktop\first>git commit -m "ok"
+[master (root-commit) 79674fb] ok
+ 1 file changed, 1 insertion(+)
+ create mode 100644 txt/note.txt
+
+C:\Users\HP\Desktop\first>git remote add origin https://github.com/Princepal27/first_rep.git
+
+C:\Users\HP\Desktop\first>git push origin master
+info: please complete authentication in your browser...
+Enumerating objects: 4, done.
+Counting objects: 100% (4/4), done.
+Writing objects: 100% (4/4), 272 bytes | 272.00 KiB/s, done.
+Total 4 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/Princepal27/first_rep.git
+ * [new branch]      master -> master
+
+C:\Users\HP\Desktop\first>git add .
+
+C:\Users\HP\Desktop\first>git commit -m "second"
+[master 5af4d21] second
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+C:\Users\HP\Desktop\first>git push origin master
+Enumerating objects: 7, done.
+Counting objects: 100% (7/7), done.
+Writing objects: 100% (4/4), 323 bytes | 161.00 KiB/s, done.
+Total 4 (delta 0), reused 0 (delta 0), pack-reused 0
+To https://github.com/Princepal27/first_rep.git
+   79674fb..5af4d21  master -> master
+
+C:\Users\HP\Desktop\first>
